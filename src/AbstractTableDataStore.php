@@ -11,6 +11,7 @@
 namespace Webino;
 
 use Doctrine\DBAL\DBALException;
+use Doctrine\DBAL\Query\QueryBuilder;
 use Doctrine\DBAL\Schema\Table;
 
 /**
@@ -78,6 +79,31 @@ abstract class AbstractTableDataStore implements InstanceFactoryMethodInterface
     {
         $schema = $this->connection->getSchemaManager();
         $schema->dropTable($this::NAME);
+    }
+
+    /**
+     * Returns data select.
+     *
+     * @return DataQuery
+     */
+    public function select(): DataQuery
+    {
+        $query = new DataQuery($this->connection);
+        $query->select('*');
+        $query->from($this::NAME);
+        return $query;
+    }
+
+    /**
+     * Returns select data query result.
+     *
+     * @param DataQuery $select
+     * @return array
+     */
+    public function fetch(DataQuery $select): array
+    {
+        $stmt = $select->execute();
+        return $stmt->fetchAll();
     }
 
     /**

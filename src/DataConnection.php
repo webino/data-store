@@ -58,10 +58,12 @@ class DataConnection extends Connection implements InstanceFactoryMethodInterfac
     }
 
     /**
+     * Create database.
+     *
      * @throws DBALException
      * @return void
      */
-    public function createDatabase(): void
+    public function setUp(): void
     {
         $options = clone $this->options;
         $options->database = '';
@@ -73,5 +75,17 @@ class DataConnection extends Connection implements InstanceFactoryMethodInterfac
         $schema = $connection->getSchemaManager();
         $schema->dropAndCreateDatabase($this->getDatabase());
         $connection->close();
+    }
+
+    /**
+     * Drops database.
+     *
+     * @return void
+     */
+    public function tearDown(): void
+    {
+        $schema = $this->getSchemaManager();
+        $schema->dropDatabase($this->getDatabase());
+        $this->close();
     }
 }

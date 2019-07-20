@@ -60,31 +60,45 @@ $options->user = 'b6nhbl';
 $options->password = 'rlj8e2ad';
 $options->database = 'mydb';
 
-/** @var DataConnection $conn */
-$conn = $container->make(DataConnection::class, $options);
+/** @var DataConnection $db */
+$db = $container->make(DataConnection::class, $options);
 
-$conn->createDatabase();
+$db->setUp();
 
 /** @var ExampleDataStore $exampleStore */
-$exampleStore = $container->make(ExampleDataStore::class, $conn);
+$exampleStore = $container->make(ExampleDataStore::class, $db);
 /** @var ExampleTwoDataStore $exampleTwoStore */
-$exampleTwoStore = $container->make(ExampleTwoDataStore::class, $conn);
+$exampleTwoStore = $container->make(ExampleTwoDataStore::class, $db);
 
 $exampleStore->setUp();
 $exampleTwoStore->setUp();
 
-$isConnected = $conn->isConnected();
+$isConnected = $db->isConnected();
 
 $id = $exampleStore->insert(['label' => 'pokus', 'text' => 'lorem ipsum test bla bla...']);
 $exampleStore->update(['id' => $id, 'label' => 'pokus updated']);
 
 $exampleStore->insert(['label' => 'pokus2']);
 
+$exampleSelect = $exampleStore->select();
+
+$exampleData = $exampleStore->fetch($exampleSelect);
+
+//dd($data);
+
 
 $exampleTwoStore->insert(['number' => '123456', 'note' => 'special note test bla bla...']);
 $exampleTwoStore->insert(['number' => '654789']);
 
-$conn->close();
+$exampleTwoSelect = $exampleTwoStore->select();
+$exampleTwoData = $exampleStore->fetch($exampleTwoSelect);
+
+//$db->tearDown();
+$db->close();
+$isNotConnected = $db->isConnected();
 
 
 Assert::true($isConnected);
+Assert::false($isNotConnected);
+Assert::same(require 'DataStore.exampleData.php', $exampleData);
+Assert::same(require 'DataStore.exampleTwoData.php', $exampleTwoData);
