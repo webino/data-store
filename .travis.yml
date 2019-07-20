@@ -1,0 +1,15 @@
+language: php
+php:
+- 7.1
+before_install:
+- composer self-update
+install:
+- composer install --no-interaction --prefer-source
+- composer require php-coveralls/php-coveralls
+script:
+- composer build
+after_failure:
+# Prints tests *.actual files content
+- for i in $(find ./tests -name \*.actual); do echo "--- $i"; cat $i; echo; echo; done
+after_success:
+- travis_retry php vendor/bin/php-coveralls -v

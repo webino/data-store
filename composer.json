@@ -1,0 +1,61 @@
+{
+  "name": "webino/data-store",
+  "description": "Data store implementation.",
+  "type": "library",
+  "license": "BSD-3-Clause",
+  "authors": [
+    {
+      "name": "Peter Bacinsky",
+      "email": "peter@bacinsky.sk"
+    }
+  ],
+  "require": {
+    "php": "~7.1",
+    "doctrine/dbal": "2.9.*",
+    "webino/exceptions": "dev-develop",
+    "webino/instance-container": "dev-develop",
+    "webino/event-emitter": "dev-develop"
+  },
+  "require-dev": {
+    "tracy/tracy": "2.*",
+    "phpstan/phpstan": "0.*",
+    "squizlabs/php_codesniffer": "3.*",
+    "webino/testing": "dev-develop",
+    "webino/develop": "dev-develop"
+  },
+  "autoload": {
+    "psr-4": {
+      "Webino\\": [
+        "src"
+      ]
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Webino\\": [
+        "tests/src"
+      ]
+    }
+  },
+  "suggest": {
+    "tracy/tracy": "Better debug."
+  },
+  "scripts": {
+    "check": "vendor/bin/phpcs --extensions=php,phpt",
+    "fix": "vendor/bin/phpcbf --extensions=php,phpt",
+    "analyse": "vendor/bin/phpstan analyse src --level max",
+    "test": "vendor/bin/webino-test",
+    "build": [
+      "@check",
+      "@analyse",
+      "@test"
+    ]
+  },
+  "scripts-descriptions": {
+    "check": "Coding style check.",
+    "fix": "Coding style fix.",
+    "analyse": "Static analysis.",
+    "test": "Run tests.",
+    "build": "Automated build."
+  }
+}
