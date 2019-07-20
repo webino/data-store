@@ -81,19 +81,27 @@ abstract class AbstractTableDataStore implements InstanceFactoryMethodInterface
     }
 
     /**
+     * Insert data.
+     *
      * @param array $data
+     * @return int Insert ID.
+     * @throws DBALException
      */
-    public function insert(array $data): void
+    public function insert(array $data): int
     {
-        $query = $this->connection->createQueryBuilder();
-        $values = [];
-        foreach ($data as $key => $value) {
-            $values[$key] = '?';
-        }
+        $this->connection->insert($this::NAME, $data);
+        return $this->connection->lastInsertId();
+    }
 
-        $params = array_values($data);
-
-        $query->insert($this::NAME)->values($values)->setParameters($params);
-        $query->execute();
+    /**
+     * Update data.
+     *
+     * @param array $data
+     * @return int Affected rows.
+     * @throws DBALException
+     */
+    public function update(array $data): int
+    {
+        return $this->connection->update($this::NAME, $data, ['id' => $data['id']]);
     }
 }

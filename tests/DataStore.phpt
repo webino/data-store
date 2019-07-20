@@ -2,6 +2,7 @@
 /**
  * Webino™ (http://webino.sk)
  *
+ * @noinspection PhpUnhandledExceptionInspection
  * @link        https://github.com/webino/data-store
  * @copyright   Copyright (c) 2019 Webino, s.r.o. (http://webino.sk)
  * @author      Peter Bačinský <peter@bacinsky.sk>
@@ -74,9 +75,11 @@ $exampleTwoStore->setUp();
 
 $isConnected = $conn->isConnected();
 
+$id = $exampleStore->insert(['label' => 'pokus', 'text' => 'lorem ipsum test bla bla...']);
+$exampleStore->update(['id' => $id, 'label' => 'pokus updated']);
 
-$exampleStore->insert(['label' => 'pokus', 'text' => 'lorem ipsum test bla bla...']);
 $exampleStore->insert(['label' => 'pokus2']);
+
 
 $exampleTwoStore->insert(['number' => '123456', 'note' => 'special note test bla bla...']);
 $exampleTwoStore->insert(['number' => '654789']);
