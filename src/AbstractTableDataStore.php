@@ -12,7 +12,9 @@ namespace Webino;
 
 use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Query\QueryBuilder;
+use Doctrine\DBAL\Schema\Comparator;
 use Doctrine\DBAL\Schema\Table;
+use Doctrine\DBAL\Schema\TableDiff;
 
 /**
  * Class AbstractTableDataStore
@@ -48,28 +50,81 @@ abstract class AbstractTableDataStore implements InstanceFactoryMethodInterface
     }
 
     /**
+     * @param string $storeClass
+     * @return array
+     * @throws DBALException
+     * @todo decouple
+     */
+    protected function createSchema(string $storeClass): array
+    {
+        $schema = $this->connection->getSchemaManager();
+        $comparator = new Comparator;
+
+        $tables = [];
+        $alters = [];
+
+        $name = constant($storeClass . '::NAME');
+        $table = new Table($name);
+
+        $tables[$name] = $table;
+
+        $table->addColumn('id', 'integer')
+            ->setAutoincrement(true)
+            ->setUnsigned(true);
+
+        $columns = constant($storeClass . '::COLUMNS');
+        foreach ($columns as $colName => $colSpec) {
+
+            // TODO relations
+            if (is_string($colSpec) && class_exists($colSpec)) {
+                $subName = constant($colSpec . '::NAME');
+                list($subTable) = $this->createSchema($colSpec);
+                $subTable = current($subTable);
+                $subTableNew = clone $subTable;
+
+                $subIdName = $colName . '_id';
+                $subTableNew->addColumn($subIdName, 'integer')
+                    ->setUnsigned(true);
+
+                $subTableNew->addForeignKeyConstraint($name, [$subIdName], ['id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
+
+                $subDiff = $comparator->diffTable($subTable, $subTableNew);
+
+                $tables[$subName] = $subTable;
+                $alters[] = $subDiff;
+                continue;
+            }
+
+            // common
+            if (is_array($colSpec)) {
+                $colOpts = $colSpec;
+                unset($colOpts['type']);
+                $table->addColumn($colName, $colSpec['type'], $colOpts);
+            }
+        }
+
+        $table->setPrimaryKey(['id']);
+        return [$tables, $alters];
+    }
+
+    /**
      * @return void
      * @throws DBALException
      */
     public function setUp(): void
     {
         $schema = $this->connection->getSchemaManager();
+        list($tables, $alters) = $this->createSchema(get_class($this));
 
-        $table = new Table($this::NAME);
-
-        $table->addColumn('id', 'integer')
-            ->setAutoincrement(true)
-            ->setUnsigned(true);
-
-        foreach ($this::COLUMNS as $colName => $colSpec) {
-            $colOpts = $colSpec;
-            unset($colOpts['type']);
-            $table->addColumn($colName, $colSpec['type'], $colOpts);
+        foreach ($tables as $tableName => $table) {
+            if (!$schema->tablesExist([$tableName])) {
+                $schema->createTable($table);
+            }
         }
 
-        $table->setPrimaryKey(['id']);
-
-        $schema->createTable($table);
+        foreach ($alters as $alter) {
+            $schema->alterTable($alter);
+        }
     }
 
     /**

@@ -31,6 +31,24 @@ class ExampleDataStore extends AbstractTableDataStore
             'length' => 2000,
             'notnull' => false,
         ],
+        'subs' => ExampleSubDataStore::class,
+    ];
+}
+
+class ExampleSubDataStore extends AbstractTableDataStore
+{
+    public const NAME = 'example_sub';
+
+    public const COLUMNS = [
+        'name' => [
+            'type' => 'string',
+            'length' => 100,
+        ],
+        'description' => [
+            'type' => 'text',
+            'length' => 2000,
+            'notnull' => false,
+        ],
     ];
 }
 
