@@ -74,8 +74,8 @@ $container = new InstanceContainer;
 
 $options = new MySqlDataConnectionOptions;
 $options->host = '127.0.0.1';
-$options->user = 'b6nhbl';
-$options->password = 'rlj8e2ad';
+$options->user = 'jsrjne';
+$options->password = 'z9fn1n6dumas';
 $options->database = 'mydb';
 
 /** @var DataConnection $db */
@@ -98,7 +98,17 @@ $exampleStore->update(['id' => $id, 'label' => 'pokus updated']);
 
 $exampleStore->insert(['label' => 'pokus2']);
 
+// TODO !!!
+
+$exampleStore->on('data_select_event', function () {
+    die('Event OK');
+});
+
 $exampleSelect = $exampleStore->select();
+
+$exampleSelect->select(['subs']);
+
+die($exampleSelect->getSQL());
 
 $exampleData = $exampleStore->fetch($exampleSelect);
 

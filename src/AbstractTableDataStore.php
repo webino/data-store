@@ -11,16 +11,14 @@
 namespace Webino;
 
 use Doctrine\DBAL\DBALException;
-use Doctrine\DBAL\Query\QueryBuilder;
 use Doctrine\DBAL\Schema\Comparator;
 use Doctrine\DBAL\Schema\Table;
-use Doctrine\DBAL\Schema\TableDiff;
 
 /**
  * Class AbstractTableDataStore
  * @package data-store
  */
-abstract class AbstractTableDataStore implements InstanceFactoryMethodInterface
+abstract class AbstractTableDataStore extends AbstractDataStore implements InstanceFactoryMethodInterface
 {
     public const NAME = 'example';
 
@@ -50,6 +48,14 @@ abstract class AbstractTableDataStore implements InstanceFactoryMethodInterface
     }
 
     /**
+     * @return DataConnection
+     */
+    public function getConnection(): DataConnection
+    {
+        return $this->connection;
+    }
+
+    /**
      * @param string $storeClass
      * @return array
      * @throws DBALException
@@ -57,7 +63,6 @@ abstract class AbstractTableDataStore implements InstanceFactoryMethodInterface
      */
     protected function createSchema(string $storeClass): array
     {
-        $schema = $this->connection->getSchemaManager();
         $comparator = new Comparator;
 
         $tables = [];
@@ -139,11 +144,11 @@ abstract class AbstractTableDataStore implements InstanceFactoryMethodInterface
     /**
      * Returns data select.
      *
-     * @return DataQuery
+     * @return DataSelect
      */
-    public function select(): DataQuery
+    public function select(): DataSelect
     {
-        $query = new DataQuery($this->connection);
+        $query = new DataSelect($this);
         $query->select('*');
         $query->from($this::NAME);
         return $query;
@@ -152,10 +157,10 @@ abstract class AbstractTableDataStore implements InstanceFactoryMethodInterface
     /**
      * Returns select data query result.
      *
-     * @param DataQuery $select
+     * @param DataSelect $select
      * @return array
      */
-    public function fetch(DataQuery $select): array
+    public function fetch(DataSelect $select): array
     {
         $stmt = $select->execute();
         return $stmt->fetchAll();
